@@ -129,7 +129,7 @@ body {
     display: flex;
     align-items: flex-start;
     flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: space-between;   
 }
 
 .card {
@@ -140,6 +140,16 @@ body {
     margin-bottom: 30px;
     flex-basis: 33%;
 }
+
+.cards a {
+    text-decoration: none;
+}
+
+.card-main:hover {
+    opacity: .8;
+    /* color: #706c6c; */
+}
+
 
 .card-image {
     width: 384px;
