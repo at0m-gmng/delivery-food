@@ -28,7 +28,15 @@ const modalBody =  document.querySelector(".modal-body");
 const modalPrice = document.querySelector(".modal-pricetag");
 const buttonClearCard = document.querySelector(".clear-cart");
 
+
+const inputSearch =  document.querySelector(".input-search");
+
 let login = localStorage.getItem('gloDelivery');
+
+const valid = function(str) {
+  const nameReg = /^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$/ ;
+  return nameReg.test(str);
+}
 
 const cart = [];
 const loadCart = function() {
@@ -89,13 +97,14 @@ function noAutorized () {
 
   function logIn(event) {
     event.preventDefault();
-    login = loginInput.value;
-    localStorage.setItem('gloDelivery', login);
-    if (login) {
+    if (valid(loginInput.value)) {
       loginInput.style.border = '';
+      login = loginInput.value;
+      localStorage.setItem('gloDelivery', login);
     } else { 
       loginInput.style.border = '1px solid red';
-      alert('Введите Логин'); 
+      loginInput.value = '';
+      // alert('Введите Корректный Логин'); 
       toogleModalAuth();
       buttonAuth.removeEventListener('click', toogleModalAuth);
     }
@@ -306,8 +315,66 @@ function init() {
     restaurants.classList.remove('hide');
     menu.classList.add('hide');
   });
+
+  inputSearch.addEventListener('keydown', function(event) {
+    if (event.keyCode === 13) {
+      const target = event.target;
+      const value = target.value.toLowerCase().trim(); // по нему фильтруем все товары, CAPSLOCK неважен
+
+      target.value = ''; //очищаем поле ввода
+      if(!value) {
+        target.style.border = '2px solid red';
+        setTimeout(function() {
+          target.style.border = '';
+        }, 250);
+        return;
+      }
+      
+      const goods = [];
+
+      getData('./db/partners.json')
+      .then(function(data) { 
+
+      const products = data.map(function(item) {
+        return item.products;
+      });
+
+      products.forEach(function(product) {
+        getData(`./db/${product}`)
+        .then(function(data) {
+          goods.push(...data); 
+
+          const searchGoods = goods.filter(function(item) {
+            return item.name.toLowerCase().includes(value);
+          }); 
+          
+          cardsMenu.textContent = '';
+          containerPromo.classList.add('hide');
+          restaurants.classList.add('hide');
+          menu.classList.remove('hide');
+          restaurantTitle.textContent = 'Результат поиска';
+          rating.textContent = '';
+          minPrice.textContent = '';
+          category.textContent = '';
+
+          return searchGoods;
+        })
+        .then(function(data) {
+          data.forEach(createCardGood);
+        });
+      });
+
+      });
+    }
+  });
   checkAuth();
+  
+  new Swiper('.swiper-container', {
+    loop: true,
+    autoplay: true
+  }) ;
 }
+
 
 init();
 
