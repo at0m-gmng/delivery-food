@@ -27,10 +27,20 @@ const category = document.querySelector(".category");
 const modalBody =  document.querySelector(".modal-body");
 const modalPrice = document.querySelector(".modal-pricetag");
 const buttonClearCard = document.querySelector(".clear-cart");
+
 let login = localStorage.getItem('gloDelivery');
 
-
 const cart = [];
+const loadCart = function() {
+  if (localStorage.getItem(login)){
+    JSON.parse(localStorage.getItem(login)).forEach(function(item) {
+      cart.push(item);
+    });
+  }
+}
+const saveCart = function() {
+  localStorage.setItem(login, JSON.stringify(cart));
+} 
 
 const getData = async function(url) {
   const response = await fetch(url);
@@ -53,6 +63,7 @@ function toogleModalAuth() {
 function autorized () {
   function logOut() {
     login = '';
+    cart.length = '';
     localStorage.removeItem('gloDelivery');
     buttonAuth.style.display = '';
     userName.style.display = '';
@@ -62,15 +73,15 @@ function autorized () {
     logInForm.reset();
     checkAuth();  
   }
-  console.log('Авторизован');
 
+  console.log('Авторизован');
   userName.textContent = login;
   buttonAuth.style.display = 'none';
   userName.style.display = 'inline';
   buttonOut.style.display = 'flex';
   cartButton.style.display = 'flex';
   buttonOut.addEventListener('click', logOut);
-
+  loadCart();
 }
 
 function noAutorized () {
@@ -219,8 +230,7 @@ function addToCart(event) {
     } else {
       cart.push({ id, title, cost, count: 1 });
     }
-
-    // localStorage.setItem('cartTitle', cart);
+    saveCart();
     console.log(cart);
   }
 
@@ -268,6 +278,7 @@ function changeCount(event) {
     if(target.classList.contains('counter-plus'))food.count++;
     renderCart();
   }
+  saveCart();
 }
 
 function init() {
